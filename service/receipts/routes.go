@@ -1,6 +1,8 @@
 package receipts
 
 import (
+	"encoding/json"
+	"go/types"
 	"log"
 	"net/http"
 
@@ -20,6 +22,10 @@ func (h *Handler) RegisterRoutes(router *mux.Router) {
 }
 
 func (h *Handler) handleProcess(w http.ResponseWriter, r *http.Request) {
+	if r.Body == nil {
+	}
+	var payload types.ReceiptPayload
+	err := json.NewDecoder(r.Body).Decode(payload)
 	log.Println("Post working")
 }
 
