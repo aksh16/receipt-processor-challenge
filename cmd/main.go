@@ -11,7 +11,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	server := api.NewAPIServer(":8080", nil)
+	server := api.NewAPIServer(":8080", db)
 	err = server.Run()
 	if err != nil {
 		log.Fatal(err)

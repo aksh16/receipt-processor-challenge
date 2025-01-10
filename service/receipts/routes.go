@@ -1,9 +1,8 @@
 package receipts
 
 import (
+	"backend/types"
 	"backend/utils"
-	"encoding/json"
-	"go/types"
 	"log"
 	"net/http"
 
@@ -19,14 +18,14 @@ func NewHandler(store types.ReceiptStore) *Handler {
 }
 
 func (h *Handler) RegisterRoutes(router *mux.Router) {
-	router.HandleFunc("/receipts/process", h.handleProcess).Methods("POST")
+	router.HandleFunc("/receipts/process", h.handleReceipts).Methods("POST")
 	router.HandleFunc("/receipts/{id}/points", h.handlePoints).Methods("GET")
 }
 
-func (h *Handler) handleProcess(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) handleReceipts(w http.ResponseWriter, r *http.Request) {
 	var payload types.ReceiptPayload
-	if err := utils.ParsePayload(r *http.Request, payload json){
-		utils.WriteError(w,http.StatusBadRequest,err)
+	if err := utils.ParsePayload(r, &payload); err != nil {
+		utils.WriteError(w, http.StatusBadRequest, err)
 	}
 	log.Println("Post working")
 }
