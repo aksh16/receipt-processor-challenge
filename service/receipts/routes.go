@@ -11,10 +11,11 @@ import (
 )
 
 type Handler struct {
+	store types.ReceiptStore
 }
 
-func NewHandler() *Handler {
-	return &Handler{}
+func NewHandler(store types.ReceiptStore) *Handler {
+	return &Handler{store: store}
 }
 
 func (h *Handler) RegisterRoutes(router *mux.Router) {

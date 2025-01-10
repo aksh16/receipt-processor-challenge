@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-func ParsePayload(r *http.Request, payload json) error {
+func ParsePayload(r *http.Request, payload *json.RawMessage) error {
 	if r.Body == nil {
 		return fmt.Errorf("request body empty")
 	}
