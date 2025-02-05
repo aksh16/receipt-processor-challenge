@@ -2,7 +2,7 @@ package receipts
 
 import (
 	"database/sql"
-	"fmt"
+	"log"
 )
 
 type Store struct {
@@ -13,48 +13,44 @@ func NewStore(db *sql.DB) *Store {
 	return &Store{db: db}
 }
 
-func (s *Store) GetPoints(receipt_id int64) (int64, error) {
-	rows, err := s.db.Query("SELECT points FROM processor WHERE id = ?", receipt_id)
+func (s *Store) GetPoints(receipt_id uint64) (uint64, error) {
+	var points uint64
+	err := s.db.QueryRow("SELECT points FROM processor WHERE id = ?", receipt_id).Scan(&points)
 	if err != nil {
-		return 0, fmt.Errorf("error querying points: %w", err)
-	}
-	defer rows.Close()
-
-	if !rows.Next() {
-		return 0, fmt.Errorf("receipt not found")
-	}
-
-	var points int64
-	if err := rows.Scan(&points); err != nil {
-		return 0, fmt.Errorf("error scanning points: %w", err)
+		log.Println("Select:", err)
+		return 0, err
 	}
 
 	return points, nil
 }
 
-func (s *Store) AddReceipt(receipt string, points int) error {
-	_, err := s.db.Exec("INSERT INTO processor (receipt,points) VALUES (?,?)", receipt, points)
+func (s *Store) AddPoints(points uint64) (uint64, error) {
+	var result uint64
+	log.Println("Points for db:", points)
+	err := s.db.QueryRow("INSERT INTO processor (points) VALUES (?) RETURNING id", points).Scan(&result)
 	if err != nil {
-		return err
+		log.Println("Insert:", err)
+		return 0, err
 	}
-	return nil
+	s.CheckDB()
+	return result, nil
 }
 
-func (s *Store) GetId() (int64, error) {
-	rows, err := s.db.Query("SELECT MAX(id) FROM processor")
+func (s *Store) CheckDB() {
+	rows, err := s.db.Query("SELECT * FROM processor")
 	if err != nil {
-		return 0, fmt.Errorf("error querying id: %w", err)
+		log.Println(err)
 	}
 	defer rows.Close()
 
-	if !rows.Next() {
-		return 0, fmt.Errorf("table is empty")
+	for rows.Next() {
+		var id int
+		var points uint64
+		err := rows.Scan(&id, &points)
+		log.Println(points)
+		if err != nil {
+			log.Fatal("Check:", err)
+		}
+		log.Printf("ID: %d, Points: %d\n", id, points)
 	}
-
-	var id int64
-	if err := rows.Scan(&id); err != nil {
-		return 0, fmt.Errorf("error scanning id: %w", err)
-	}
-
-	return id, nil
 }

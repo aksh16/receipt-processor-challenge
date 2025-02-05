@@ -27,10 +27,6 @@ func WriteResponse(w http.ResponseWriter, status int, v any) error {
 	return json.NewEncoder(w).Encode(v)
 }
 
-func WriteError(w http.ResponseWriter, status int, err error) {
-	WriteResponse(w, status, map[string]string{"error": err.Error()})
-}
-
 func GetEmptyJSONFields(payload any) []string {
 	emptyFields := []string{}
 	val := reflect.ValueOf(payload)

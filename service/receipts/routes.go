@@ -3,11 +3,9 @@ package receipts
 import (
 	"backend/types"
 	"backend/utils"
-	"errors"
-	"fmt"
 	"log"
 	"net/http"
-	"strings"
+	"strconv"
 
 	"github.com/gorilla/mux"
 )
@@ -28,19 +26,40 @@ func (h *Handler) RegisterRoutes(router *mux.Router) {
 func (h *Handler) handleReceipts(w http.ResponseWriter, r *http.Request) {
 	var payload types.ReceiptPayload
 	if err := utils.ParsePayload(r, &payload); err != nil {
-		utils.WriteError(w, http.StatusBadRequest, err)
+		log.Println("Incorrect format")
+		utils.WriteResponse(w, http.StatusBadRequest, "The receipt is invalid")
+		return
 	}
 	emptyFields := utils.GetEmptyJSONFields(payload)
 	if len(emptyFields) > 0 {
-		utils.WriteError(w, http.StatusBadRequest, errors.New(fmt.Sprintf("empty fields found: %s",
-			strings.Join(emptyFields, ", "))))
+		log.Println("Empty fields")
+		utils.WriteResponse(w, http.StatusBadRequest, "The receipt is invalid")
+		return
 	}
 	points := utils.CalculatePoints(payload)
-
-	points_response := map[string]uint64{"points": points}
+	receipt_id, err := h.store.AddPoints(points)
+	if err != nil {
+		log.Println("Failed to add to db")
+		utils.WriteResponse(w, http.StatusBadRequest, "The receipt is invalid")
+		return
+	}
+	points_response := map[string]uint64{"receipt_id": receipt_id}
 	utils.WriteResponse(w, http.StatusOK, points_response)
 }
 
 func (h *Handler) handlePoints(w http.ResponseWriter, r *http.Request) {
-	log.Println("Get working")
+	id := mux.Vars(r)
+	receipt_id, err := strconv.ParseUint(id["id"], 10, 64)
+	if err != nil {
+		log.Println("Invalid ID format")
+		utils.WriteResponse(w, http.StatusBadRequest, "No receipt found for that id")
+		return
+	}
+	points, err := h.store.GetPoints(receipt_id)
+	if err != nil {
+		log.Println("No record in db")
+		utils.WriteResponse(w, http.StatusBadRequest, "No receipt found for that id")
+		return
+	}
+	utils.WriteResponse(w, http.StatusOK, points)
 }

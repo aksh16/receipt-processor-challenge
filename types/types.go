@@ -1,8 +1,9 @@
 package types
 
 type ReceiptStore interface {
-	GetPoints(receipt_id int64) (int64, error)
-	AddReceipt(receipt string, points int) error
+	GetPoints(receipt_id uint64) (uint64, error)
+	AddPoints(points uint64) (uint64, error)
+	CheckDB()
 }
 
 type Item struct {
