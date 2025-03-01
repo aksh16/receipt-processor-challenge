@@ -18,3 +18,11 @@ type ReceiptPayload struct {
 	Items        []Item `json:"items"`
 	Total        string `json:"total"`
 }
+
+type PointsResponse struct {
+	Points uint64 `json:"points"`
+}
+
+type IdResponse struct {
+	Id uint64 `json:"id"`
+}

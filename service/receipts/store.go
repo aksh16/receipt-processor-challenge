@@ -15,29 +15,28 @@ func NewStore(db *sql.DB) *Store {
 
 func (s *Store) GetPoints(receipt_id uint64) (uint64, error) {
 	var points uint64
-	err := s.db.QueryRow("SELECT points FROM processor WHERE id = ?", receipt_id).Scan(&points)
+	err := s.db.QueryRow("SELECT points FROM receipts WHERE id = ?", receipt_id).Scan(&points)
 	if err != nil {
 		log.Println("Select:", err)
 		return 0, err
 	}
-
+	log.Printf("GetPoints ID: %d, Points: %d\n", receipt_id, points)
 	return points, nil
 }
 
 func (s *Store) AddPoints(points uint64) (uint64, error) {
-	var result uint64
-	log.Println("Points for db:", points)
-	err := s.db.QueryRow("INSERT INTO processor (points) VALUES (?) RETURNING id", points).Scan(&result)
+	var id uint64
+	err := s.db.QueryRow("INSERT INTO receipts (points) VALUES (?) RETURNING id", points).Scan(&id)
 	if err != nil {
 		log.Println("Insert:", err)
 		return 0, err
 	}
-	s.CheckDB()
-	return result, nil
+	log.Printf("AddPoints ID: %d, Points: %d\n", id, points)
+	return id, nil
 }
 
 func (s *Store) CheckDB() {
-	rows, err := s.db.Query("SELECT * FROM processor")
+	rows, err := s.db.Query("SELECT * FROM receipts")
 	if err != nil {
 		log.Println(err)
 	}
@@ -47,7 +46,6 @@ func (s *Store) CheckDB() {
 		var id int
 		var points uint64
 		err := rows.Scan(&id, &points)
-		log.Println(points)
 		if err != nil {
 			log.Fatal("Check:", err)
 		}

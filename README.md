@@ -1,3 +1,6 @@
+# Running the project
+Cloning the project, installing the dependencies and running cmd/main.go will launch the application. A compiled binary with the name "receipt-processor" is also provided to directly run the project.
+
 # Receipt Processor
 
 Build a webservice that fulfils the documented API. The API is described below. A formal definition is provided 

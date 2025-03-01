@@ -48,9 +48,10 @@ func GetEmptyJSONFields(payload any) []string {
 
 func CalculatePoints(payload types.ReceiptPayload) uint64 {
 	var points uint64 = 0
+
 	// Get points for retailer name
 	points += CalculateNamePoints(payload.Retailer)
-	log.Println("Points from name:", points)
+
 	// Get points for purchase date
 	purchaseDate := payload.PurchaseDate
 	day := purchaseDate[strings.LastIndex(purchaseDate, "-")+1:]
@@ -61,7 +62,7 @@ func CalculatePoints(payload types.ReceiptPayload) uint64 {
 	if day_num%2 != 0 {
 		points += 6
 	}
-	log.Println("Points from date:", points)
+
 	// Get points for purchase time on the day
 	purchaseTime := payload.PurchaseTime
 	if idx := strings.IndexByte(purchaseTime, ':'); idx >= 0 {
@@ -81,15 +82,12 @@ func CalculatePoints(payload types.ReceiptPayload) uint64 {
 			points += 10
 		}
 	}
-	log.Println("Points from time:", points)
+
 	// Get points for number of items
-	// log.Println(len(payload.Items) / 2)
 	points += uint64((len(payload.Items))/2) * 5
-	log.Println("Points from item #:", points)
 	for _, item := range payload.Items {
 		points += CalculateItemPoints(item)
 	}
-	log.Println("Points from item:", points)
 	total, err := strconv.ParseFloat(payload.Total, 64)
 	if err != nil {
 		log.Fatal(err)
@@ -122,7 +120,6 @@ func CalculateItemPoints(item types.Item) uint64 {
 	}
 	var item_points uint64 = 0
 	if len(description)%3 == 0 {
-		println(description, len(description))
 		item_points = uint64(math.Ceil(price * 0.2))
 	}
 	return item_points

@@ -43,8 +43,8 @@ func (h *Handler) handleReceipts(w http.ResponseWriter, r *http.Request) {
 		utils.WriteResponse(w, http.StatusBadRequest, "The receipt is invalid")
 		return
 	}
-	points_response := map[string]uint64{"receipt_id": receipt_id}
-	utils.WriteResponse(w, http.StatusOK, points_response)
+	id_response := types.IdResponse{Id: receipt_id}
+	utils.WriteResponse(w, http.StatusOK, id_response)
 }
 
 func (h *Handler) handlePoints(w http.ResponseWriter, r *http.Request) {
@@ -57,9 +57,10 @@ func (h *Handler) handlePoints(w http.ResponseWriter, r *http.Request) {
 	}
 	points, err := h.store.GetPoints(receipt_id)
 	if err != nil {
-		log.Println("No record in db")
+		log.Printf("ID:%d, No record in db", receipt_id)
 		utils.WriteResponse(w, http.StatusBadRequest, "No receipt found for that id")
 		return
 	}
-	utils.WriteResponse(w, http.StatusOK, points)
+	points_response := types.PointsResponse{Points: points}
+	utils.WriteResponse(w, http.StatusOK, points_response)
 }
